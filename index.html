@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Para Ti — Un pequeño universo 💖</title>
+  <meta name="description" content="Un rincón hecho con cariño para ti." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Tipografías del sistema para que cargue rápido -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Fondo dinámico de estrellas -->
+  <canvas id="starfield" aria-hidden="true"></canvas>
+
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="#hero">Para Ti</a>
+      <div class="nav-links">
+        <a href="#poemas">Poemas</a>
+        <a href="#razones">Razones</a>
+        <a href="#galeria">Galería</a>
+        <a href="#final">Último mensaje</a>
+      </div>
+      <button id="serenataBtn" class="btn btn-ghost" title="Activa la serenata">🎵 Serenata</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="section hero">
+      <div class="glass card-hero">
+        <h1 class="title">
+          <span class="typewriter" data-phrases='["Hola, esto es para ti.","Quise construirte un universo.","Porque contigo, la vida late más fuerte."]'></span>
+        </h1>
+        <p class="subtitle">
+          No es sólo una página: es un pequeño homenaje a lo que inspiras.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#poemas">Leer poemas</a>
+          <button id="confetiBtn" class="btn btn-heart" title="Haz clic 😉">❤️</button>
+        </div>
+      </div>
+      <div class="floating-hearts" aria-hidden="true"></div>
+    </section>
+
+    <!-- POEMAS (Carrusel) -->
+    <section id="poemas" class="section">
+      <div class="glass card">
+        <h2 class="section-title">Poemas para Ti</h2>
+        <div class="carousel" role="region" aria-label="Carrusel de poemas">
+          <button class="carousel-btn prev" aria-label="Poema anterior">‹</button>
+          <div class="carousel-track">
+            <!-- POEMA 1 -->
+            <article class="poema">
+              <h3>Constelación</h3>
+              <p>
+                Cuando llegaste, el cielo entendió su tarea: <br/>
+                bordar de luces el borde de tus pasos.<br/>
+                Llevas en la mirada una aurora que despierta mares,<br/>
+                y en tu risa, la brújula donde mi norte descansa.<br/><br/>
+                Si el tiempo fuera un río, te haría puente de latidos;<br/>
+                si el miedo fuera invierno, te haría hoguera de calma.<br/>
+                Porque en el mapa de mi vida, tus manos son coordenadas,<br/>
+                y tu nombre, la estrella fija que guía mis jornadas.
+              </p>
+            </article>
+
+            <!-- POEMA 2 -->
+            <article class="poema">
+              <h3>Silencio que canta</h3>
+              <p>
+                Hay silencios que pesan y otros que cantan; el tuyo,<br/>
+                sin decir palabra, me escribió un futuro.<br/>
+                En la orilla de tus ojos amarra mi esperanza,<br/>
+                y en el puerto de tus gestos atraca mi ternura.<br/><br/>
+                Te pienso en plural: nosotros. <br/>
+                Te cuido en diminuto: aquí. <br/>
+                Te sueño en presente: ahora.<br/>
+                Y si el mundo corre, que corra; yo prefiero caminar contigo.
+              </p>
+            </article>
+
+            <!-- POEMA 3 -->
+            <article class="poema">
+              <h3>Respirar tu nombre</h3>
+              <p>
+                Pronunciar tu nombre es aprender a respirar de nuevo:<br/>
+                entra la luz, sale el miedo. <br/>
+                Si la noche pregunta por mí, dile que estoy ensayando auroras<br/>
+                con el abecedario de tus gestos.<br/><br/>
+                Que la vida no es perfecta, pero tú haces que valga la pena<br/>
+                cada página, cada margen, cada punto y aparte.<br/>
+                Y si alguna vez me pierdo, será en ti: el mejor lugar.
+              </p>
+            </article>
+
+            <!-- POEMA 4 -->
+            <article class="poema">
+              <h3>Promesa pequeña</h3>
+              <p>
+                No te prometo galaxias, pero sí un cielo claro;<br/>
+                no castillos, pero sí un hogar en mis brazos.<br/>
+                No la eternidad, pero sí el milagro humilde<br/>
+                de un “hoy” que no se rinde, de un “nosotros” que persiste.<br/><br/>
+                Si el amor es decisión, la mía eres tú;<br/>
+                si el amor es camino, elijo tus pasos;<br/>
+                si el amor es verdad, que la verdad nos haga uno.
+              </p>
+            </article>
+          </div>
+          <button class="carousel-btn next" aria-label="Poema siguiente">›</button>
+        </div>
+        <div class="carousel-dots" aria-hidden="true"></div>
+      </div>
+    </section>
+
+    <!-- RAZONES (tarjetas animadas) -->
+    <section id="razones" class="section">
+      <div class="grid">
+        <article class="reason reveal glass">
+          <h4>Tu risa</h4>
+          <p>Porque suena a libertad y me enseña a celebrar lo sencillo.</p>
+        </article>
+        <article class="reason reveal glass">
+          <h4>Tu mirada</h4>
+          <p>Porque en ella la noche se vuelve cielo habitable.</p>
+        </article>
+        <article class="reason reveal glass">
+          <h4>Tu forma de ser</h4>
+          <p>Porque haces del bien algo natural y de la bondad, costumbre.</p>
+        </article>
+        <article class="reason reveal glass">
+          <h4>Tu valentía</h4>
+          <p>Porque avanzas incluso cuando el viento va en contra.</p>
+        </article>
+        <article class="reason reveal glass">
+          <h4>Tu paz</h4>
+          <p>Porque al llegar, todo encaja; al quedarte, todo florece.</p>
+        </article>
+        <article class="reason reveal glass">
+          <h4>Tu fe</h4>
+          <p>Porque donde otros ven azar, tú ves propósito y esperanza.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- GALERÍA (citas/versículos) -->
+    <section id="galeria" class="section">
+      <div class="marquee glass" role="region" aria-label="Frases que me recuerdan a ti">
+        <div class="marquee-inner">
+          <span class="tag">“El amor es paciente, es bondadoso.” — 1 Co 13</span>
+          <span class="tag">“Te pienso y el mundo se ordena.”</span>
+          <span class="tag">“La paz en tu voz me encuentra.”</span>
+          <span class="tag">“Contigo, el tiempo tiene sentido.”</span>
+          <span class="tag">“Eres mi lugar favorito.”</span>
+          <span class="tag">“Dios hace nuevas todas las cosas.” — Ap 21:5</span>
+          <span class="tag">“El amor verdadero echa fuera el temor.” — 1 Jn 4:18</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÚLTIMO MENSAJE -->
+    <section id="final" class="section">
+      <div class="glass card final-card reveal">
+        <h2>Un último mensaje</h2>
+        <p>
+          No sé qué traerá el futuro, pero hoy quería decirte —sin prisas, sin ruido— 
+          que tu existencia ya es regalo. Si quieres, caminamos; si dudas, espero;
+          si temes, te cuido. Y si sonríes… ya gané el día.
+        </p>
+        <button class="btn btn-primary" id="irArriba">Volver arriba</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Hecho con cariño por <strong>Diego</strong> · <span id="year"></span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
