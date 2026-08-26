@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LogicForge Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&family=STIX+Two+Math&display=swap" rel="stylesheet" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <style>
+        /* ============================================================
+               CSS VARIABLES (Temas claro / oscuro)
+               ============================================================ */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-main: #ffffff;
+            --bg-sidebar: #f1f5f9;
+            --bg-card: #ffffff;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-math: 'STIX Two Math', serif;
+            --transition: 150ms ease;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #0c1222;
+            --bg-main: #161f33;
+            --bg-sidebar: #111a2b;
+            --bg-card: #1e2a40;
+            --border-color: #243049;
+            --text-primary: #e2e8f0;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ============================================================
+               RESET Y BASE
+               ============================================================ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            padding: 16px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color var(--transition), color var(--transition);
+        }
+
+        .app {
+            width: 100%;
+            max-width: 1440px;
+            height: 100%;
+            max-height: 96vh;
+            background: var(--bg-main);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            display: flex;
+            overflow: hidden;
+            transition: background var(--transition), box-shadow var(--transition);
+        }
+
+        .sidebar {
+            width: 300px;
+            min-width: 300px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-header svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-secondary);
+        }
+
+        .sidebar-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        #glossaryGrid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .glossary-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 8px 14px 8px 10px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition), background var(--transition);
+        }
+
+        .glossary-item:hover {
+            border-color: #b9c7da;
+        }
+
+        .glossary-symbol {
+            font-family: var(--font-math);
+            font-weight: 700;
+            font-size: 1.2rem;
+            background: var(--text-primary);
+            color: var(--bg-main);
+            padding: 0 12px;
+            border-radius: 20px;
+            min-width: 36px;
+            text-align: center;
+            line-height: 30px;
+            transition: background var(--transition), color var(--transition);
+        }
+
+        .glossary-item input {
+            border: none;
+            background: transparent;
+            padding: 6px 4px;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            width: 100%;
+            border-bottom: 1px dashed var(--border-color);
+            color: var(--text-primary);
+            transition: border-color var(--transition), color var(--transition);
+        }
+
+        .glossary-item input:focus {
+            outline: none;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .glossary-empty {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .main {
+            flex: 1;
+            padding: 24px 32px 32px 32px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            background: var(--bg-main);
+            transition: background var(--transition);
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .main-header h1 {
+            font-size: 1.6rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            transition: color var(--transition);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .header-actions button {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: background var(--transition), color var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .header-actions button:hover {
+            background: var(--bg-sidebar);
+            color: var(--text-primary);
+        }
+
+        .header-actions button svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+
+        .lang-buttons {
+            display: flex;
+            gap: 4px;
+        }
+
+        .lang-buttons button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            color: var(--text-secondary);
+            font-family: var(--font-sans);
+        }
+
+        .lang-buttons button.active {
+            background: var(--text-primary);
+            color: var(--bg-main);
+            border-color: var(--text-primary);
+        }
+
+        .lang-buttons button:hover:not(.active) {
+            background: var(--bg-sidebar);
+        }
+
+        .controls {
+            background: var(--bg-sidebar);
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            transition: background var(--transition);
+            border-left: 4px solid var(--accent);
+        }
+
+        .controls label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .controls select {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: border-color var(--transition), background var(--transition);
+            font-weight: 500;
+        }
+
+        .controls select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .action-bar button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 40px;
+            border: none;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--bg-sidebar);
+            color: var(--text-secondary);
+        }
+
+        .action-bar button:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .action-bar .danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .action-bar .danger:hover {
+            background: #fecaca;
+        }
+
+        .action-bar .primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .action-bar .primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .action-bar button svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+
+        .premises-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .premise-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-card);
+            padding: 6px 16px 6px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            transition: border-color var(--transition), background var(--transition);
+        }
+
+        .premise-row:hover {
+            border-color: #b9c7da;
+        }
+
+        .premise-label {
+            font-family: var(--font-math);
+            font-weight: 700;
+            font-size: 1.1rem;
+            min-width: 44px;
+            color: var(--text-secondary);
+        }
+
+        .premise-row input {
+            flex: 1;
+            border: none;
+            padding: 12px 0;
+            font-family: var(--font-math);
+            font-size: 1rem;
+            background: transparent;
+            color: var(--text-primary);
+            transition: color var(--transition);
+        }
+
+        .premise-row input:focus {
+            outline: none;
+        }
+
+        .conclusion-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--bg-sidebar);
+            padding: 6px 16px 6px 18px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--accent);
+            margin-top: 4px;
+            transition: background var(--transition), border-color var(--transition);
+        }
+
+        .conclusion-row .premise-label {
+            color: var(--accent);
+        }
+
+        .conclusion-row input {
+            flex: 1;
+            border: none;
+            padding: 12px 0;
+            font-family: var(--font-math);
+            font-size: 1rem;
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .conclusion-row input:focus {
+            outline: none;
+        }
+
+        .tutorial-toggle {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-family: var(--font-sans);
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all var(--transition);
+            align-self: flex-start;
+            margin: 12px 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tutorial-toggle:hover {
+            background: var(--bg-sidebar);
+            color: var(--text-primary);
+        }
+
+        .tutorial-panel {
+            background: var(--bg-sidebar);
+            border-radius: var(--radius-sm);
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            margin-bottom: 16px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .tutorial-panel.open {
+            max-height: 800px;
+            padding: 20px;
+        }
+
+        .tutorial-panel h4 {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .tutorial-panel ul {
+            padding-left: 20px;
+        }
+
+        .tutorial-panel li {
+            margin-bottom: 8px;
+        }
+
+        .bottom-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .bottom-actions button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 40px;
+            border: none;
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all var(--transition);
+            background: var(--bg-sidebar);
+            color: var(--text-secondary);
+        }
+
+        .bottom-actions button:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .bottom-actions .primary {
+            background: var(--text-primary);
+            color: var(--bg-main);
+        }
+
+        .bottom-actions .primary:hover {
+            background: #1e293b;
+            transform: scale(1.01);
+        }
+
+        .bottom-actions button svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+        }
+
+        .save-indicator {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .save-indicator .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #22c55e;
+            display: inline-block;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: var(--bg-main);
+            border-radius: var(--radius);
+            max-width: 680px;
+            width: 100%;
+            max-height: 80vh;
+            padding: 28px 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            transform: scale(0.96);
+            transition: transform 0.25s ease, background var(--transition);
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .truth-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 0.9rem;
+        }
+
+        .truth-table th,
+        .truth-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            text-align: center;
+        }
+
+        .truth-table th {
+            background: var(--bg-sidebar);
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .truth-table .valid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .truth-table .invalid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+
+        .result-badge.valid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .result-badge.invalid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item .name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .history-item .date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .history-actions button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            padding: 4px;
+            transition: color var(--transition);
+        }
+
+        .history-actions button:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 850px) {
+            .app {
+                flex-direction: column;
+                max-height: none;
+                border-radius: var(--radius);
+            }
+            .sidebar {
+                width: 100%;
+                min-width: unset;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                max-height: 220px;
+                padding: 16px;
+            }
+            .main {
+                padding: 20px;
+            }
+            .main-header h1 {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 8px;
+            }
+            .main {
+                padding: 16px;
+            }
+            .premise-row {
+                flex-wrap: wrap;
+                padding: 10px 14px;
+            }
+            .premise-label {
+                min-width: 36px;
+                font-size: 1rem;
+            }
+            .action-bar button,
+            .bottom-actions button {
+                width: 100%;
+                justify-content: center;
+            }
+            .controls select {
+                min-width: 120px;
+            }
+            .modal {
+                padding: 20px;
+                max-width: 100%;
+                margin: 16px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                display: block;
+            }
+            .app {
+                max-height: none;
+                border-radius: 0;
+                box-shadow: none;
+                display: block;
+                background: white;
+            }
+            .sidebar {
+                display: none !important;
+            }
+            .main {
+                padding: 0.8in;
+                overflow: visible;
+            }
+            .main-header .header-actions,
+            .controls,
+            .action-bar,
+            .tutorial-toggle,
+            .tutorial-panel,
+            .bottom-actions,
+            .save-indicator {
+                display: none !important;
+            }
+            .premise-row {
+                border: none;
+                padding-left: 0;
+                background: none;
+            }
+            .conclusion-row {
+                background: none;
+                border: 2px solid #000;
+            }
+            .premise-row input,
+            .conclusion-row input {
+                border-bottom: 1px solid #ccc;
+                color: #000;
+            }
+            .modal-overlay {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app" id="app">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <i data-lucide="book-open"></i>
+                <span data-i18n="glossaryTitle">Glosario</span>
+            </div>
+            <div class="sidebar-hint" data-i18n="glossaryHint">Asigna un criterio semántico a cada variable.</div>
+            <div id="glossaryGrid">
+                <span class="glossary-empty" data-i18n="glossaryEmpty">Escribe en las premisas para detectar variables.</span>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+            <!-- HEADER -->
+            <header class="main-header">
+                <h1>LogicForge</h1>
+                <div class="header-actions">
+                    <button id="historyBtn" title="Historial">
+                        <i data-lucide="clock"></i>
+                        <span data-i18n="history">Historial</span>
+                    </button>
+                    <button id="shareBtn" title="Compartir">
+                        <i data-lucide="share-2"></i>
+                    </button>
+                    <button id="themeToggle" title="Cambiar tema">
+                        <i data-lucide="moon" id="themeIcon"></i>
+                    </button>
+                    <div class="lang-buttons" id="langButtons">
+                        <button data-lang="es" class="active">ES</button>
+                        <button data-lang="en">EN</button>
+                        <button data-lang="ru">RU</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CONTROLS - Selector de argumentos -->
+            <div class="controls">
+                <label data-i18n="argTypeLabel">Tipo de argumento:</label>
+                <select id="argumentSelect"></select>
+            </div>
+
+            <!-- ACTION BAR -->
+            <div class="action-bar">
+                <button id="addPremiseBtn">
+                    <i data-lucide="plus"></i>
+                    <span data-i18n="addPremise">Añadir premisa</span>
+                </button>
+                <button id="removePremiseBtn" class="danger">
+                    <i data-lucide="trash-2"></i>
+                    <span data-i18n="removePremise">Eliminar última</span>
+                </button>
+            </div>
+
+            <!-- PREMISES -->
+            <div id="premisesContainer" class="premises-area"></div>
+
+            <!-- CONCLUSION -->
+            <div class="conclusion-row">
+                <span class="premise-label" data-i18n="conclusionLabel">∴ C</span>
+                <input type="text" id="conclusionInput" placeholder="Escribe la conclusión..." value="Q" />
+            </div>
+
+            <!-- TUTORIAL -->
+            <button class="tutorial-toggle" id="tutorialToggle">
+                <i data-lucide="help-circle"></i>
+                <span data-i18n="tutorialToggle">Mostrar tutorial</span>
+            </button>
+            <div class="tutorial-panel" id="tutorialPanel">
+                <h4 data-i18n="tutorialTitle">Cómo usar LogicForge</h4>
+                <ul>
+                    <li data-i18n="tutorialStep1"><strong>1. Elige un tipo de argumento:</strong> Selecciona una plantilla del menú. Las premisas y conclusión se rellenarán automáticamente. También puedes usar 'Personalizado'.</li>
+                    <li data-i18n="tutorialStep2"><strong>2. Edita las premisas y conclusión:</strong> Escribe fórmulas lógicas con →, ¬, ∧, ∨, ↔ (o ->, !, &, |, <->).</li>
+                    <li data-i18n="tutorialStep3"><strong>3. Añade o elimina premisas:</strong> Usa los botones para ajustar el número de premisas (S₁, S₂, S₃...).</li>
+                    <li data-i18n="tutorialStep4"><strong>4. Asigna criterios:</strong> En el panel izquierdo (Glosario), escribe el significado de cada variable (ej. P = 'Llueve').</li>
+                    <li data-i18n="tutorialStep5"><strong>5. Valida, exporta o comparte:</strong> Usa los botones inferiores para verificar la validez, copiar en Markdown/LaTeX, exportar a PDF o compartir por URL.</li>
+                </ul>
+            </div>
+
+            <!-- BOTTOM ACTIONS -->
+            <div class="bottom-actions">
+                <button id="validateBtn" class="primary">
+                    <i data-lucide="check-circle"></i>
+                    <span data-i18n="validate">Verificar validez</span>
+                </button>
+                <button id="copyMarkdownBtn">
+                    <i data-lucide="file-text"></i>
+                    <span data-i18n="copyMarkdown">Markdown</span>
+                </button>
+                <button id="copyLatexBtn">
+                    <i data-lucide="sigma"></i>
+                    <span data-i18n="copyLatex">LaTeX</span>
+                </button>
+                <button id="exportPdfBtn" class="primary">
+                    <i data-lucide="file-down"></i>
+                    <span data-i18n="exportPdf">PDF</span>
+                </button>
+                <span class="save-indicator" id="saveIndicator">
+                    <span class="dot" id="saveDot"></span>
+                    <span data-i18n="saved">Guardado</span>
+                </span>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <div class="modal-header">
+                <h2 id="modalTitle">Título</h2>
+                <button class="modal-close" id="modalClose">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        //  LOGICFORGE PRO - CÓDIGO COMPLETO (Vanilla JS)
+        //  Con 15 argumentos: personalizado + 14 plantillas
+        // ================================================================
+
+        (function() {
+            'use strict';
+
+            // ---------- ESTADO GLOBAL ----------
+            const state = {
+                premises: ['P → Q', 'P'],
+                conclusion: 'Q',
+                variables: {},
+                lang: 'es',
+                theme: 'light',
+                tutorialOpen: false,
+                history: [],
+                historyMax: 15,
+                saveTimer: null,
+                autoSaveInterval: 3000,
+            };
+
+            // ---------- DOM REFS ----------
+            const $ = (sel) => document.querySelector(sel);
+            const $$ = (sel) => document.querySelectorAll(sel);
+
+            const premisesContainer = $('#premisesContainer');
+            const conclusionInput = $('#conclusionInput');
+            const glossaryGrid = $('#glossaryGrid');
+            const argumentSelect = $('#argumentSelect');
+            const tutorialToggle = $('#tutorialToggle');
+            const tutorialPanel = $('#tutorialPanel');
+            const modalOverlay = $('#modalOverlay');
+            const modalContent = $('#modalContent');
+            const modalTitle = $('#modalTitle');
+            const modalBody = $('#modalBody');
+            const modalClose = $('#modalClose');
+            const themeToggle = $('#themeToggle');
+            const themeIcon = $('#themeIcon');
+            const saveDot = $('#saveDot');
+
+            // ---------- PLANTILLAS (15) ----------
+            const TEMPLATES = {
+                // 1. Personalizado (vacío)
+                custom: { S: [], C: '' },
+                // 2. Modus Ponens
+                modus_ponens: { S: ['P → Q', 'P'], C: 'Q' },
+                // 3. Modus Tollens
+                modus_tollens: { S: ['P → Q', '¬Q'], C: '¬P' },
+                // 4. Silogismo Hipotético
+                silogismo_hipotetico: { S: ['P → Q', 'Q → R'], C: 'P → R' },
+                // 5. Silogismo Disyuntivo
+                silogismo_disyuntivo: { S: ['P ∨ Q', '¬P'], C: 'Q' },
+                // 6. Cosmológico (Kalam)
+                cosmologico: { S: ['E → C', 'U → E'], C: 'U → C' },
+                // 7. Teleológico (Diseño)
+                teleologico: { S: ['D → Dis', 'U → D'], C: 'U → Dis' },
+                // 8. Moral
+                moral: { S: ['¬D → Msub', '¬Msub'], C: 'D' },
+                // 9. Tomista - Acto y Potencia
+                tomista_acto: { S: ['M → O', 'U → M'], C: 'U → MI' },
+                // 10. Tomista - Esencia y Existencia
+                tomista_esencia: { S: ['E → ¬Ex', 'S → Ex'], C: 'S → SN' },
+                // ---------- NUEVOS ----------
+                // 11. Escéptico (duda metódica)
+                esceptico: { S: ['C → ¬D', 'D → ¬C'], C: '¬D' },
+                // 12. Palamita (distinción esencia–energías)
+                palamita: { S: ['D → E', 'E → U'], C: 'D → U' },
+                // 13. Luliano (Ars Magna - combinación de atributos divinos)
+                luliano: { S: ['B → G', 'G → A', 'A → V'], C: 'B → V' },
+                // 14. Musulmán (Ash'arí - contingencia)
+                musulman_ashari: { S: ['M → C', 'C → N'], C: 'M → N' },
+                // 15. Musulmán (Aviceniano - Ser Necesario)
+                musulman_avicena: { S: ['S → Ex', 'Ex → SN'], C: 'S → SN' }
+            };
+
+            // ---------- TRADUCCIONES (incluyendo los nuevos argumentos) ----------
+            const I18N = {
+                es: {
+                    glossaryTitle: 'Glosario de variables',
+                    glossaryHint: 'Asigna un criterio semántico a cada variable.',
+                    glossaryEmpty: 'Escribe en las premisas para detectar variables.',
+                    argTypeLabel: 'Tipo de argumento:',
+                    addPremise: 'Añadir premisa',
+                    removePremise: 'Eliminar última',
+                    conclusionLabel: '∴ C',
+                    tutorialToggle: 'Mostrar tutorial',
+                    tutorialToggleClose: 'Ocultar tutorial',
+                    tutorialTitle: 'Cómo usar LogicForge',
+                    tutorialStep1: '<strong>1. Elige un tipo de argumento:</strong> Selecciona una plantilla del menú. Las premisas y conclusión se rellenarán automáticamente. También puedes usar "Personalizado".',
+                    tutorialStep2: '<strong>2. Edita las premisas y conclusión:</strong> Escribe fórmulas lógicas con →, ¬, ∧, ∨, ↔ (o ->, !, &, |, <->).',
+                    tutorialStep3: '<strong>3. Añade o elimina premisas:</strong> Usa los botones para ajustar el número de premisas (S₁, S₂, S₃...).',
+                    tutorialStep4: '<strong>4. Asigna criterios:</strong> En el panel izquierdo (Glosario), escribe el significado de cada variable (ej. P = "Llueve").',
+                    tutorialStep5: '<strong>5. Valida, exporta o comparte:</strong> Usa los botones inferiores para verificar la validez, copiar en Markdown/LaTeX, exportar a PDF o compartir por URL.',
+                    validate: 'Verificar validez',
+                    copyMarkdown: 'Markdown',
+                    copyLatex: 'LaTeX',
+                    exportPdf: 'PDF',
+                    saved: 'Guardado',
+                    history: 'Historial',
+                    modalTruthTitle: 'Tabla de Verdad',
+                    modalHistoryTitle: 'Historial de Argumentos',
+                    modalShareTitle: 'Compartir argumento',
+                    copySuccess: '¡Copiado al portapapeles!',
+                    restoreConfirm: '¿Restaurar argumento anterior?',
+                    yes: 'Sí',
+                    no: 'No',
+                    noHistory: 'No hay argumentos guardados.',
+                    valid: 'Válido (Tautología)',
+                    invalid: 'Inválido (Contingencia)',
+                    contradiction: 'Contradicción',
+                    shareCopied: 'Enlace copiado al portapapeles.',
+                    premisePlaceholder: 'Escribe la premisa...',
+                    conclusionPlaceholder: 'Escribe la conclusión...',
+                    argTypes: {
+                        custom: 'Personalizado (escribe tú)',
+                        modus_ponens: 'Modus Ponens',
+                        modus_tollens: 'Modus Tollens',
+                        silogismo_hipotetico: 'Silogismo Hipotético',
+                        silogismo_disyuntivo: 'Silogismo Disyuntivo',
+                        cosmologico: 'Cosmológico (Kalam)',
+                        teleologico: 'Teleológico (Diseño)',
+                        moral: 'Argumento Moral',
+                        tomista_acto: 'Tomista - Acto y Potencia',
+                        tomista_esencia: 'Tomista - Esencia y Existencia',
+                        esceptico: 'Escéptico (duda metódica)',
+                        palamita: 'Palamita (distinción esencia–energías)',
+                        luliano: 'Luliano (Ars Magna)',
+                        musulman_ashari: 'Musulmán (Ash‘arí - contingencia)',
+                        musulman_avicena: 'Musulmán (Aviceniano - Ser Necesario)'
+                    }
+                },
+                en: {
+                    glossaryTitle: 'Variable Glossary',
+                    glossaryHint: 'Assign a semantic criterion to each variable.',
+                    glossaryEmpty: 'Type in premises to detect variables.',
+                    argTypeLabel: 'Argument type:',
+                    addPremise: 'Add premise',
+                    removePremise: 'Remove last',
+                    conclusionLabel: '∴ C',
+                    tutorialToggle: 'Show tutorial',
+                    tutorialToggleClose: 'Hide tutorial',
+                    tutorialTitle: 'How to use LogicForge',
+                    tutorialStep1: '<strong>1. Choose an argument type:</strong> Select a template from the menu. Premises and conclusion will be filled automatically. You can also use "Custom".',
+                    tutorialStep2: '<strong>2. Edit premises and conclusion:</strong> Write logical formulas with →, ¬, ∧, ∨, ↔ (or ->, !, &, |, <->).',
+                    tutorialStep3: '<strong>3. Add or remove premises:</strong> Use the buttons to adjust the number of premises (S₁, S₂, S₃...).',
+                    tutorialStep4: '<strong>4. Assign criteria:</strong> In the left panel (Glossary), write the meaning of each variable (e.g., P = "It rains").',
+                    tutorialStep5: '<strong>5. Validate, export or share:</strong> Use the bottom buttons to check validity, copy as Markdown/LaTeX, export to PDF or share via URL.',
+                    validate: 'Check validity',
+                    copyMarkdown: 'Markdown',
+                    copyLatex: 'LaTeX',
+                    exportPdf: 'PDF',
+                    saved: 'Saved',
+                    history: 'History',
+                    modalTruthTitle: 'Truth Table',
+                    modalHistoryTitle: 'Argument History',
+                    modalShareTitle: 'Share argument',
+                    copySuccess: 'Copied to clipboard!',
+                    restoreConfirm: 'Restore previous argument?',
+                    yes: 'Yes',
+                    no: 'No',
+                    noHistory: 'No saved arguments.',
+                    valid: 'Valid (Tautology)',
+                    invalid: 'Invalid (Contingency)',
+                    contradiction: 'Contradiction',
+                    shareCopied: 'Link copied to clipboard.',
+                    premisePlaceholder: 'Write the premise...',
+                    conclusionPlaceholder: 'Write the conclusion...',
+                    argTypes: {
+                        custom: 'Custom (write yourself)',
+                        modus_ponens: 'Modus Ponens',
+                        modus_tollens: 'Modus Tollens',
+                        silogismo_hipotetico: 'Hypothetical Syllogism',
+                        silogismo_disyuntivo: 'Disjunctive Syllogism',
+                        cosmologico: 'Cosmological (Kalam)',
+                        teleologico: 'Teleological (Design)',
+                        moral: 'Moral Argument',
+                        tomista_acto: 'Thomistic - Act & Potency',
+                        tomista_esencia: 'Thomistic - Essence & Existence',
+                        esceptico: 'Skeptical (methodic doubt)',
+                        palamita: 'Palamite (essence–energies distinction)',
+                        luliano: 'Lullian (Ars Magna)',
+                        musulman_ashari: 'Muslim (Ash‘arī - contingency)',
+                        musulman_avicena: 'Muslim (Avicennian - Necessary Being)'
+                    }
+                },
+                ru: {
+                    glossaryTitle: 'Глоссарий переменных',
+                    glossaryHint: 'Назначьте семантический критерий каждой переменной.',
+                    glossaryEmpty: 'Напишите в посылках, чтобы обнаружить переменные.',
+                    argTypeLabel: 'Тип аргумента:',
+                    addPremise: 'Добавить посылку',
+                    removePremise: 'Удалить последнюю',
+                    conclusionLabel: '∴ C',
+                    tutorialToggle: 'Показать руководство',
+                    tutorialToggleClose: 'Скрыть руководство',
+                    tutorialTitle: 'Как использовать LogicForge',
+                    tutorialStep1: '<strong>1. Выберите тип аргумента:</strong> Выберите шаблон из меню. Посылки и заключение заполнятся автоматически. Также можно использовать "Пользовательский".',
+                    tutorialStep2: '<strong>2. Редактируйте посылки и заключение:</strong> Пишите логические формулы с →, ¬, ∧, ∨, ↔ (или ->, !, &, |, <->).',
+                    tutorialStep3: '<strong>3. Добавляйте или удаляйте посылки:</strong> Используйте кнопки, чтобы настроить количество посылок (S₁, S₂, S₃...).',
+                    tutorialStep4: '<strong>4. Назначьте критерии:</strong> На левой панели (Глоссарий) напишите значение каждой переменной (например, P = "Идёт дождь").',
+                    tutorialStep5: '<strong>5. Проверьте, экспортируйте или поделитесь:</strong> Используйте нижние кнопки для проверки валидности, копирования в Markdown/LaTeX, экспорта в PDF или публикации по ссылке.',
+                    validate: 'Проверить валидность',
+                    copyMarkdown: 'Markdown',
+                    copyLatex: 'LaTeX',
+                    exportPdf: 'PDF',
+                    saved: 'Сохранено',
+                    history: 'История',
+                    modalTruthTitle: 'Таблица истинности',
+                    modalHistoryTitle: 'История аргументов',
+                    modalShareTitle: 'Поделиться аргументом',
+                    copySuccess: 'Скопировано в буфер обмена!',
+                    restoreConfirm: 'Восстановить предыдущий аргумент?',
+                    yes: 'Да',
+                    no: 'Нет',
+                    noHistory: 'Нет сохранённых аргументов.',
+                    valid: 'Валидный (Тавтология)',
+                    invalid: 'Невалидный (Контингентность)',
+                    contradiction: 'Противоречие',
+                    shareCopied: 'Ссылка скопирована в буфер обмена.',
+                    premisePlaceholder: 'Напишите посылку...',
+                    conclusionPlaceholder: 'Напишите заключение...',
+                    argTypes: {
+                        custom: 'Пользовательский (пишите сами)',
+                        modus_ponens: 'Modus Ponens',
+                        modus_tollens: 'Modus Tollens',
+                        silogismo_hipotetico: 'Условно-категорический силлогизм',
+                        silogismo_disyuntivo: 'Разделительно-категорический силлогизм',
+                        cosmologico: 'Космологический (Калам)',
+                        teleologico: 'Телеологический (Дизайн)',
+                        moral: 'Нравственный аргумент',
+                        tomista_acto: 'Томистский - Акт и Потенция',
+                        tomista_esencia: 'Томистский - Сущность и Существование',
+                        esceptico: 'Скептический (методическое сомнение)',
+                        palamita: 'Паламитский (различие сущности и энергий)',
+                        luliano: 'Луллианский (Ars Magna)',
+                        musulman_ashari: 'Мусульманский (Ашаритский - контингентность)',
+                        musulman_avicena: 'Мусульманский (Авиценновский - Необходимое Сущее)'
+                    }
+                }
+            };
+
+            // ---------- UTILIDADES ----------
+            function getLang() { return state.lang; }
+
+            function t(key) {
+                const lang = getLang();
+                const dict = I18N[lang] || I18N.es;
+                return dict[key] || key;
+            }
+
+            function getArgTypes() {
+                const lang = getLang();
+                return I18N[lang].argTypes || I18N.es.argTypes;
+            }
+
+            function generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+            }
+
+            function extractVariables(text) {
+                if (!text) return [];
+                const matches = text.match(/\b([A-Z](?:[A-Z0-9_₁₂₃₄₅₆₇₈₉₀]?)*)\b/g);
+                if (!matches) return [];
+                const exclude = ['SI', 'NO', 'Y', 'O', 'PERO', 'EL', 'LA', 'LOS', 'LAS', 'UN', 'UNA', 'POR', 'PARA', 'CON',
+                    'SIN', 'DEL', 'AL', 'E', 'C', 'U', 'D', 'M', 'O', 'MI', 'SN', 'Ex', 'C', 'N', 'V', 'G', 'A'
+                ];
+                return matches.filter(v => !exclude.includes(v) && v.length <= 4);
+            }
+
+            // ---------- RENDER PREMISAS ----------
+            function renderPremises() {
+                premisesContainer.innerHTML = '';
+                state.premises.forEach((value, index) => {
+                    const num = index + 1;
+                    const row = document.createElement('div');
+                    row.className = 'premise-row';
+                    const label = document.createElement('span');
+                    label.className = 'premise-label';
+                    label.textContent = `S₍${num}₎`;
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = t('premisePlaceholder');
+                    input.value = value || '';
+                    input.dataset.index = index;
+                    input.addEventListener('input', (e) => {
+                        state.premises[index] = e.target.value;
+                        updateGlossary();
+                        autoSave();
+                    });
+                    row.appendChild(label);
+                    row.appendChild(input);
+                    premisesContainer.appendChild(row);
+                });
+                updatePremisePlaceholders();
+                updateGlossary();
+            }
+
+            function updatePremisePlaceholders() {
+                $$('#premisesContainer .premise-row input').forEach(inp => {
+                    inp.placeholder = t('premisePlaceholder');
+                });
+            }
+
+            function addPremise() {
+                state.premises.push('');
+                renderPremises();
+                autoSave();
+            }
+
+            function removePremise() {
+                if (state.premises.length > 2) {
+                    state.premises.pop();
+                    renderPremises();
+                    autoSave();
+                }
+            }
+
+            // ---------- GLOSARIO ----------
+            function updateGlossary() {
+                const allText = state.premises.join(' ') + ' ' + state.conclusion;
+                const vars = extractVariables(allText);
+                const newVars = {};
+                vars.forEach(v => {
+                    newVars[v] = state.variables[v] || '';
+                });
+                state.variables = newVars;
+
+                const entries = Object.entries(state.variables);
+                if (entries.length === 0) {
+                    glossaryGrid.innerHTML = `<span class="glossary-empty">${t('glossaryEmpty')}</span>`;
+                    return;
+                }
+                let html = '';
+                entries.forEach(([key, value]) => {
+                    html += `
+                        <div class="glossary-item">
+                            <span class="glossary-symbol">${key}</span>
+                            <input type="text" data-var="${key}" value="${value}" placeholder="${t('glossaryHint')}" />
+                        </div>
+                    `;
+                });
+                glossaryGrid.innerHTML = html;
+                glossaryGrid.querySelectorAll('input[data-var]').forEach(inp => {
+                    inp.addEventListener('input', (e) => {
+                        const varName = e.target.dataset.var;
+                        state.variables[varName] = e.target.value;
+                        autoSave();
+                    });
+                });
+            }
+
+            // ---------- CARGAR PLANTILLA ----------
+            function loadTemplate(key) {
+                if (key === 'custom') {
+                    state.premises = ['', ''];
+                    state.conclusion = '';
+                    renderPremises();
+                    conclusionInput.value = '';
+                    updateGlossary();
+                    autoSave();
+                    return;
+                }
+                const tmpl = TEMPLATES[key];
+                if (!tmpl) return;
+                state.premises = tmpl.S.length ? tmpl.S.slice() : ['', ''];
+                state.conclusion = tmpl.C || '';
+                renderPremises();
+                conclusionInput.value = state.conclusion;
+                updateGlossary();
+                autoSave();
+            }
+
+            // ---------- RENDER SELECT ----------
+            function renderArgumentSelect() {
+                const types = getArgTypes();
+                let html = '';
+                for (const [key, label] of Object.entries(types)) {
+                    html += `<option value="${key}">${label}</option>`;
+                }
+                argumentSelect.innerHTML = html;
+                if (argumentSelect.options.length === 0) {
+                    argumentSelect.innerHTML = `<option value="custom">Personalizado</option>`;
+                }
+                const currentVal = argumentSelect.dataset.current || 'custom';
+                if (argumentSelect.querySelector(`option[value="${currentVal}"]`)) {
+                    argumentSelect.value = currentVal;
+                } else {
+                    argumentSelect.value = 'custom';
+                }
+                argumentSelect.addEventListener('change', () => {
+                    argumentSelect.dataset.current = argumentSelect.value;
+                    loadTemplate(argumentSelect.value);
+                });
+            }
+
+            // ---------- CONCLUSION INPUT ----------
+            conclusionInput.addEventListener('input', (e) => {
+                state.conclusion = e.target.value;
+                updateGlossary();
+                autoSave();
+            });
+
+            // ---------- GUARDADO AUTOMÁTICO ----------
+            function autoSave() {
+                if (state.saveTimer) clearTimeout(state.saveTimer);
+                state.saveTimer = setTimeout(() => {
+                    saveState();
+                    showSavedIndicator();
+                }, state.autoSaveInterval);
+            }
+
+            function saveState() {
+                const data = {
+                    premises: state.premises,
+                    conclusion: state.conclusion,
+                    variables: state.variables,
+                    lang: state.lang,
+                    theme: state.theme,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('logicforge_state', JSON.stringify(data));
+                saveToHistory();
+            }
+
+            function showSavedIndicator() {
+                saveDot.style.opacity = '1';
+                setTimeout(() => {
+                    saveDot.style.opacity = '0.4';
+                }, 1500);
+            }
+
+            function saveToHistory() {
+                const hasContent = state.premises.some(p => p.trim() !== '') || state.conclusion.trim() !== '';
+                if (!hasContent) return;
+                const last = state.history[0];
+                if (last) {
+                    const currentStr = JSON.stringify({ premises: state.premises, conclusion: state.conclusion,
+                        variables: state.variables });
+                    const lastStr = JSON.stringify({ premises: last.premises, conclusion: last.conclusion,
+                        variables: last.variables });
+                    if (currentStr === lastStr) return;
+                }
+                const entry = {
+                    id: generateId(),
+                    premises: state.premises.slice(),
+                    conclusion: state.conclusion,
+                    variables: { ...state.variables },
+                    date: new Date().toISOString()
+                };
+                state.history.unshift(entry);
+                if (state.history.length > state.historyMax) {
+                    state.history.pop();
+                }
+                localStorage.setItem('logicforge_history', JSON.stringify(state.history));
+            }
+
+            function loadState() {
+                const saved = localStorage.getItem('logicforge_state');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        if (confirm(t('restoreConfirm'))) {
+                            state.premises = data.premises || ['', ''];
+                            state.conclusion = data.conclusion || '';
+                            state.variables = data.variables || {};
+                            state.lang = data.lang || 'es';
+                            state.theme = data.theme || 'light';
+                            renderPremises();
+                            conclusionInput.value = state.conclusion;
+                            updateGlossary();
+                            setLanguage(state.lang);
+                            setTheme(state.theme);
+                            const hist = localStorage.getItem('logicforge_history');
+                            if (hist) {
+                                try {
+                                    state.history = JSON.parse(hist);
+                                } catch (e) { state.history = []; }
+                            }
+                            return true;
+                        }
+                    } catch (e) { /* ignore */ }
+                }
+                loadTemplate('modus_ponens');
+                return false;
+            }
+
+            // ---------- TEMA OSCURO ----------
+            function setTheme(theme) {
+                state.theme = theme;
+                document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : '');
+                themeIcon.setAttribute('data-lucide', theme === 'dark' ? 'sun' : 'moon');
+                lucide.createIcons();
+                localStorage.setItem('logicforge_theme', theme);
+            }
+
+            function toggleTheme() {
+                setTheme(state.theme === 'light' ? 'dark' : 'light');
+            }
+
+            // ---------- IDIOMA ----------
+            function setLanguage(lang) {
+                state.lang = lang;
+                $$('#langButtons button').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.lang === lang);
+                });
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.dataset.i18n;
+                    el.textContent = t(key);
+                });
+                updatePremisePlaceholders();
+                conclusionInput.placeholder = t('conclusionPlaceholder');
+                renderArgumentSelect();
+                updateGlossary();
+                if (tutorialPanel.classList.contains('open')) {
+                    tutorialPanel.innerHTML = `
+                        <h4 data-i18n="tutorialTitle">${t('tutorialTitle')}</h4>
+                        <ul>
+                            <li data-i18n="tutorialStep1">${t('tutorialStep1')}</li>
+                            <li data-i18n="tutorialStep2">${t('tutorialStep2')}</li>
+                            <li data-i18n="tutorialStep3">${t('tutorialStep3')}</li>
+                            <li data-i18n="tutorialStep4">${t('tutorialStep4')}</li>
+                            <li data-i18n="tutorialStep5">${t('tutorialStep5')}</li>
+                        </ul>
+                    `;
+                }
+                localStorage.setItem('logicforge_lang', lang);
+            }
+
+            // ---------- TUTORIAL ----------
+            tutorialToggle.addEventListener('click', () => {
+                const isOpen = tutorialPanel.classList.contains('open');
+                if (isOpen) {
+                    tutorialPanel.classList.remove('open');
+                    tutorialToggle.querySelector('span').textContent = t('tutorialToggle');
+                } else {
+                    tutorialPanel.classList.add('open');
+                    tutorialToggle.querySelector('span').textContent = t('tutorialToggleClose');
+                    if (!tutorialPanel.querySelector('ul')) {
+                        tutorialPanel.innerHTML = `
+                            <h4 data-i18n="tutorialTitle">${t('tutorialTitle')}</h4>
+                            <ul>
+                                <li data-i18n="tutorialStep1">${t('tutorialStep1')}</li>
+                                <li data-i18n="tutorialStep2">${t('tutorialStep2')}</li>
+                                <li data-i18n="tutorialStep3">${t('tutorialStep3')}</li>
+                                <li data-i18n="tutorialStep4">${t('tutorialStep4')}</li>
+                                <li data-i18n="tutorialStep5">${t('tutorialStep5')}</li>
+                            </ul>
+                        `;
+                    }
+                }
+            });
+
+            // ---------- VALIDACIÓN ----------
+            function generateTruthTable(variables, premises, conclusion) {
+                const n = variables.length;
+                if (n === 0 || n > 5) {
+                    return { table: [], result: 'No se puede evaluar (más de 5 variables o ninguna).' };
+                }
+                const rows = [];
+                const total = Math.pow(2, n);
+                let validCount = 0;
+                let invalidCount = 0;
+
+                function evaluateFormula(formula, assignment) {
+                    let expr = formula;
+                    for (const [varName, val] of Object.entries(assignment)) {
+                        expr = expr.replace(new RegExp(`\\b${varName}\\b`, 'g'), val ? 'true' : 'false');
+                    }
+                    expr = expr.replace(/→/g, '=>');
+                    expr = expr.replace(/↔/g, '===');
+                    expr = expr.replace(/¬/g, '!');
+                    expr = expr.replace(/∧/g, '&&');
+                    expr = expr.replace(/∨/g, '||');
+                    try {
+                        return !!new Function(`return (${expr})`)();
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                for (let i = 0; i < total; i++) {
+                    const assignment = {};
+                    for (let j = 0; j < n; j++) {
+                        assignment[variables[j]] = !!(i & (1 << (n - 1 - j)));
+                    }
+                    const premiseResults = premises.map(p => evaluateFormula(p, assignment));
+                    const conclusionResult = evaluateFormula(conclusion, assignment);
+                    const allPremisesTrue = premiseResults.every(r => r === true);
+                    const isValid = allPremisesTrue ? conclusionResult : true;
+                    if (allPremisesTrue && !conclusionResult) {
+                        invalidCount++;
+                    } else if (allPremisesTrue && conclusionResult) {
+                        validCount++;
+                    }
+                    rows.push({
+                        assignment,
+                        premiseResults,
+                        conclusionResult,
+                        isValid
+                    });
+                }
+
+                let result = '';
+                if (invalidCount === 0 && validCount > 0) result = 'valid';
+                else if (validCount === 0 && invalidCount > 0) result = 'invalid';
+                else if (validCount > 0 && invalidCount > 0) result = 'contingent';
+                else result = 'unknown';
+
+                return { table: rows, result, variables };
+            }
+
+            function showTruthTable() {
+                const vars = Object.keys(state.variables);
+                if (vars.length === 0) {
+                    alert('No se detectaron variables. Escribe algunas premisas.');
+                    return;
+                }
+                const result = generateTruthTable(vars, state.premises, state.conclusion);
+                let html = '';
+                if (result.result === 'No se puede evaluar (más de 5 variables o ninguna).') {
+                    html = `<p>${result.result}</p>`;
+                } else {
+                    html += `<table class="truth-table"><thead><tr><th>#</th>`;
+                    for (const v of vars) {
+                        html += `<th>${v}</th>`;
+                    }
+                    for (let i = 0; i < state.premises.length; i++) {
+                        html += `<th>S${i+1}</th>`;
+                    }
+                    html += `<th>C</th><th>Válido?</th></tr></thead><tbody>`;
+                    result.table.forEach((row, idx) => {
+                        html += `<tr>`;
+                        html += `<td>${idx+1}</td>`;
+                        for (const v of vars) {
+                            html += `<td>${row.assignment[v] ? 'V' : 'F'}</td>`;
+                        }
+                        for (const r of row.premiseResults) {
+                            html += `<td>${r ? 'V' : 'F'}</td>`;
+                        }
+                        html += `<td>${row.conclusionResult ? 'V' : 'F'}</td>`;
+                        html += `<td>${row.isValid ? 'Sí' : 'No'}</td>`;
+                        html += `</tr>`;
+                    });
+                    html += `</tbody></table>`;
+                    let badge = '';
+                    if (result.result === 'valid') badge =
+                    `<span class="result-badge valid">${t('valid')}</span>`;
+                    else if (result.result === 'invalid') badge =
+                        `<span class="result-badge invalid">${t('invalid')}</span>`;
+                    else if (result.result === 'contingent') badge =
+                        `<span class="result-badge invalid">${t('invalid')}</span>`;
+                    else badge = `<span>${t('unknown')}</span>`;
+                    html += `<p>${badge}</p>`;
+                }
+                openModal(t('modalTruthTitle'), html);
+            }
+
+            // ---------- MODAL ----------
+            function openModal(title, bodyHTML) {
+                modalTitle.textContent = title;
+                modalBody.innerHTML = bodyHTML;
+                modalOverlay.classList.add('active');
+                lucide.createIcons();
+            }
+
+            function closeModal() {
+                modalOverlay.classList.remove('active');
+            }
+
+            modalClose.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) closeModal();
+            });
+
+            // ---------- HISTORIAL ----------
+            function showHistory() {
+                if (state.history.length === 0) {
+                    openModal(t('modalHistoryTitle'), `<p>${t('noHistory')}</p>`);
+                    return;
+                }
+                let html = '';
+                state.history.forEach((item, index) => {
+                    const name = item.conclusion.slice(0, 40) || 'Argumento ' + (index + 1);
+                    const date = new Date(item.date).toLocaleString();
+                    html += `
+                        <div class="history-item">
+                            <div>
+                                <div class="name">${name}</div>
+                                <div class="date">${date}</div>
+                            </div>
+                            <div class="history-actions">
+                                <button data-action="load" data-id="${item.id}" title="Cargar">
+                                    <i data-lucide="folder-open"></i>
+                                </button>
+                                <button data-action="delete" data-id="${item.id}" title="Eliminar">
+                                    <i data-lucide="trash-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                openModal(t('modalHistoryTitle'), html);
+                modalBody.querySelectorAll('[data-action="load"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        const entry = state.history.find(h => h.id === id);
+                        if (entry) {
+                            state.premises = entry.premises.slice();
+                            state.conclusion = entry.conclusion;
+                            state.variables = { ...entry.variables };
+                            renderPremises();
+                            conclusionInput.value = state.conclusion;
+                            updateGlossary();
+                            closeModal();
+                            autoSave();
+                        }
+                    });
+                });
+                modalBody.querySelectorAll('[data-action="delete"]').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const id = btn.dataset.id;
+                        state.history = state.history.filter(h => h.id !== id);
+                        localStorage.setItem('logicforge_history', JSON.stringify(state.history));
+                        showHistory();
+                    });
+                });
+            }
+
+            // ---------- COMPARTIR POR URL ----------
+            function shareArgument() {
+                const data = {
+                    premises: state.premises,
+                    conclusion: state.conclusion,
+                    variables: state.variables
+                };
+                const json = JSON.stringify(data);
+                const encoded = btoa(encodeURIComponent(json));
+                const url = new URL(window.location.href);
+                url.searchParams.set('arg', encoded);
+                navigator.clipboard.writeText(url.toString()).then(() => {
+                    alert(t('shareCopied'));
+                }).catch(() => {
+                    prompt('Copia este enlace:', url.toString());
+                });
+            }
+
+            // ---------- CARGAR DESDE URL ----------
+            function loadFromURL() {
+                const params = new URLSearchParams(window.location.search);
+                const encoded = params.get('arg');
+                if (!encoded) return false;
+                try {
+                    const json = decodeURIComponent(atob(encoded));
+                    const data = JSON.parse(json);
+                    if (data.premises && data.conclusion !== undefined) {
+                        if (confirm(t('restoreConfirm'))) {
+                            state.premises = data.premises.slice();
+                            state.conclusion = data.conclusion;
+                            state.variables = data.variables || {};
+                            renderPremises();
+                            conclusionInput.value = state.conclusion;
+                            updateGlossary();
+                            autoSave();
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                            return true;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+                return false;
+            }
+
+            // ---------- EXPORTAR PDF ----------
+            function exportPDF() {
+                window.print();
+            }
+
+            // ---------- COPIAR MARKDOWN ----------
+            function copyMarkdown() {
+                let md = `# Argumento Lógico Formal\n\n`;
+                md += `## Glosario:\n`;
+                const entries = Object.entries(state.variables);
+                if (entries.length) {
+                    entries.forEach(([key, val]) => {
+                        md += `- **${key}** = ${val || '(sin criterio)'}\n`;
+                    });
+                } else {
+                    md += `- (No se detectaron variables)\n`;
+                }
+                md += `\n## Premisas:\n`;
+                state.premises.forEach((p, i) => {
+                    md += `${i+1}. ${p || '(vacía)'}\n`;
+                });
+                md += `\n## Conclusión:\n`;
+                md += `∴ ${state.conclusion || '(vacía)'}\n`;
+                navigator.clipboard.writeText(md).then(() => {
+                    alert(t('copySuccess'));
+                }).catch(() => {
+                    prompt('Copia esto:', md);
+                });
+            }
+
+            // ---------- COPIAR LATEX ----------
+            function copyLatex() {
+                let latex = `\\documentclass{article}\n\\begin{document}\n`;
+                latex += `\\section*{Argumento Lógico Formal}\n\n`;
+                latex += `\\subsection*{Glosario}\n`;
+                const entries = Object.entries(state.variables);
+                if (entries.length) {
+                    latex += `\\begin{itemize}\n`;
+                    entries.forEach(([key, val]) => {
+                        latex += `\\item ${key} = ${val || '(sin criterio)'}\n`;
+                    });
+                    latex += `\\end{itemize}\n`;
+                } else {
+                    latex += `No se detectaron variables.\n`;
+                }
+                latex += `\n\\subsection*{Premisas}\n`;
+                latex += `\\begin{enumerate}\n`;
+                state.premises.forEach((p, i) => {
+                    latex += `\\item ${p || '\\text{vacía}'}\n`;
+                });
+                latex += `\\end{enumerate}\n`;
+                latex += `\n\\subsection*{Conclusión}\n`;
+                latex += `\\therefore ${state.conclusion || '\\text{vacía}'}\n`;
+                latex += `\\end{document}`;
+                navigator.clipboard.writeText(latex).then(() => {
+                    alert(t('copySuccess'));
+                }).catch(() => {
+                    prompt('Copia esto:', latex);
+                });
+            }
+
+            // ---------- EVENTOS ----------
+            document.getElementById('addPremiseBtn').addEventListener('click', addPremise);
+            document.getElementById('removePremiseBtn').addEventListener('click', removePremise);
+
+            argumentSelect.addEventListener('change', function() {
+                loadTemplate(this.value);
+            });
+
+            document.querySelectorAll('#langButtons button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setLanguage(btn.dataset.lang);
+                });
+            });
+
+            themeToggle.addEventListener('click', toggleTheme);
+
+            document.getElementById('validateBtn').addEventListener('click', showTruthTable);
+            document.getElementById('copyMarkdownBtn').addEventListener('click', copyMarkdown);
+            document.getElementById('copyLatexBtn').addEventListener('click', copyLatex);
+            document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+
+            document.getElementById('historyBtn').addEventListener('click', showHistory);
+            document.getElementById('shareBtn').addEventListener('click', shareArgument);
+
+            // ---------- INICIALIZACIÓN ----------
+            function init() {
+                const savedTheme = localStorage.getItem('logicforge_theme') || 'light';
+                setTheme(savedTheme);
+
+                const savedLang = localStorage.getItem('logicforge_lang') || 'es';
+                setLanguage(savedLang);
+
+                const loaded = loadState();
+                if (!loaded) {
+                    loadTemplate('modus_ponens');
+                }
+
+                loadFromURL();
+
+                renderArgumentSelect();
+
+                lucide.createIcons();
+
+                setInterval(() => {
+                    autoSave();
+                }, 5000);
+
+                console.log('LogicForge Pro (15 argumentos) inicializado correctamente.');
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+</body>
+</html>
